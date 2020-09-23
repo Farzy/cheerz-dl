@@ -73,9 +73,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let mut dest = {
             let fname = photo.taken_at;
-            // Remove seconds and milliseconds
-            let idx = fname.rfind(':').unwrap();
-            let fname = &fname[..idx];
+            // Remove milliseconds
             let idx = fname.rfind(':').unwrap();
             let fname = format!("{}.jpg", &fname[..idx]);
 
