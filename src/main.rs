@@ -58,7 +58,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut content = &body[(idx + DATA_PREFIX.len())..];
     idx = content.find("</script>").unwrap();
     content = &content[..idx];
-    println!("Data sample = {}", &content[..100]);
 
     let data: Data = serde_json::from_str(content)?;
 
