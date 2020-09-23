@@ -2,6 +2,44 @@
 
 Download pictures from a Cheerz event.
 
+# Building
+
+```shell script
+cargo build
+```
+
+# Running
+
+```shell script
+cargo run -- --help
+```
+
+```text
+Cheerz downloader 0.1.0
+Farzad FARID <farzy@farzy.org>:Gilles RASIGADE
+Download all pictures from a Cheerz event
+
+USAGE:
+    cheerz-dl [OPTIONS] <url>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -d, --directory <directory>    Directory to download pictures to [default: /tmp/cheerz]
+
+ARGS:
+    <url>    URL provided by Cheerz for the event
+```
+
+# Debugging
+
+Prefix the binary with `RUST_LOG=cheerz_dl=debug` in order to
+display debug messages.
+
+Using `RUST_LOG=debug` is more verbose and displays libraries' debug messages too.
+
 # Licence
 
 Copyright 2020 Gilles Rasigade, Farzad FARID

@@ -13,15 +13,19 @@
 // limitations under the License.
 
 use std::{fs, error};
-use std::fs::{ File, DirBuilder };
+use std::fs::{File, DirBuilder};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use clap::{App, Arg};
 
 #[macro_use]
 extern crate log;
+
+#[macro_use]
+extern crate clap;
 
 const DATA_PREFIX: &str = "var galleriesBundleData = ";
 const DATA_SUFFIX: &str = "</script>";
@@ -40,12 +44,12 @@ struct Data {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    if std::env::args().len() != 2 {
-        eprintln!("Usage: cheerz-dl URL");
-        std::process::exit(1);
-    }
+    env_logger::init();
 
-    let url = std::env::args().skip(1).next().unwrap();
+    let app = build_app();
+    let matches = app.get_matches();
+    let directory = matches.value_of("directory").unwrap();
+    let url = matches.value_of("url").unwrap();
 
     let body = match read_from_url(&url) {
         Ok(s) => s,
@@ -62,33 +66,57 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let data: Data = serde_json::from_str(content)?;
 
-    DirBuilder::new().recursive(true).create("/tmp/cheerz")?;
+    DirBuilder::new().recursive(true).create(directory)?;
+    let dest_dir = std::path::Path::new(directory);
 
     for photo in data.photo_data {
-        println!("Photo: {:?}", photo);
+        debug!("Photo: {:?}", photo);
 
         // let tmp_dir = Builder::new().prefix("cheerz").tempdir()?;
-        let tmp_dir = std::path::Path::new("/tmp/cheerz");
         let target = photo.original_url;
         let response = reqwest::blocking::get(&target)?;
+        debug!("Response: {:?}", response);
 
         let mut dest = {
             let fname = photo.taken_at;
-            // Remove milliseconds
-            let idx = fname.rfind(':').unwrap();
+            // Remove milliseconds and timezone
+            let idx = fname.rfind('.').unwrap();
             let fname = format!("{}.jpg", &fname[..idx]);
 
-            let fname = tmp_dir.join(fname);
-            println!("will be located under: '{:?}'", fname);
-            File::create(fname)?
+            let path = dest_dir.join(fname);
+            println!("Download: {:?}", path);
+            File::create(path)?
         };
         let content = response.bytes()?;
         dest.write(&content)?;
 
-        println!("{:?}", dest);
+        debug!("{:?}", dest);
     }
 
     Ok(())
+}
+
+/// Build command line parsing
+fn build_app() -> App<'static, 'static> {
+    App::new("Cheerz downloader")
+        .about("Download all pictures from a Cheerz event")
+        .version(crate_version!())
+        .author(crate_authors!())
+        .arg(
+            Arg::with_name("directory")
+                .help("Directory to download pictures to")
+                .long("directory")
+                .short("d")
+                .takes_value(true)
+                .required(false)
+                .default_value("/tmp/cheerz")
+        )
+        .arg(
+            Arg::with_name("url")
+                .help("URL provided by Cheerz for the event")
+                .index(1)
+                .required(true)
+        )
 }
 
 /// Read a text from from an URL and cache it in /var/tmp, return the body
