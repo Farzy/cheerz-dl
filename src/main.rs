@@ -24,6 +24,7 @@ use std::error::Error;
 extern crate log;
 
 const DATA_PREFIX: &str = "var galleriesBundleData = ";
+const DATA_SUFFIX: &str = "</script>";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Photo {
@@ -56,7 +57,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut idx = body.find(DATA_PREFIX).unwrap();
     let mut content = &body[(idx + DATA_PREFIX.len())..];
-    idx = content.find("</script>").unwrap();
+    idx = content.find(DATA_SUFFIX).unwrap();
     content = &content[..idx];
 
     let data: Data = serde_json::from_str(content)?;
