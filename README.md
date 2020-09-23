@@ -4,7 +4,7 @@ Download pictures from a Cheerz event.
 
 # Licence
 
-Copyright 2020 Farzad FARID <farzy@farzy.org>
+Copyright 2020 Gilles Rasigade, Farzad FARID
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

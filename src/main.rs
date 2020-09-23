@@ -13,14 +13,32 @@
 // limitations under the License.
 
 use std::{fs, error};
+use std::fs::{ File, DirBuilder };
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 #[macro_use]
 extern crate log;
 
-fn main() {
+const DATA_PREFIX: &str = "var galleriesBundleData = ";
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Photo {
+    url: String,
+    original_url: String,
+    taken_at: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+struct Data {
+    photo_data: Vec<Photo>,
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
     if std::env::args().len() != 2 {
         eprintln!("Usage: cheerz-dl URL");
         std::process::exit(1);
@@ -36,9 +54,43 @@ fn main() {
         }
     };
 
-    println!("Body len = {}", body.len());
-    let s = &body[0..100];
-    println!("Body start:\n{}", s);
+    let mut idx = body.find(DATA_PREFIX).unwrap();
+    let mut content = &body[(idx + DATA_PREFIX.len())..];
+    idx = content.find("</script>").unwrap();
+    content = &content[..idx];
+    println!("Data sample = {}", &content[..100]);
+
+    let data: Data = serde_json::from_str(content)?;
+
+    DirBuilder::new().recursive(true).create("/tmp/cheerz")?;
+
+    for photo in data.photo_data {
+        println!("Photo: {:?}", photo);
+
+        // let tmp_dir = Builder::new().prefix("cheerz").tempdir()?;
+        let tmp_dir = std::path::Path::new("/tmp/cheerz");
+        let target = photo.original_url;
+        let response = reqwest::blocking::get(&target)?;
+
+        let mut dest = {
+            let fname = photo.taken_at;
+            // Remove seconds and milliseconds
+            let idx = fname.rfind(':').unwrap();
+            let fname = &fname[..idx];
+            let idx = fname.rfind(':').unwrap();
+            let fname = format!("{}.jpg", &fname[..idx]);
+
+            let fname = tmp_dir.join(fname);
+            println!("will be located under: '{:?}'", fname);
+            File::create(fname)?
+        };
+        let content = response.bytes()?;
+        dest.write(&content)?;
+
+        println!("{:?}", dest);
+    }
+
+    Ok(())
 }
 
 /// Read a text from from an URL and cache it in /var/tmp, return the body
