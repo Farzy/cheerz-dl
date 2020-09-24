@@ -1,6 +1,10 @@
 # Cheerz-dl
 
-Download pictures from a Cheerz event.
+Download pictures from a [Cheerz Photobooth](https://live.cheerz.com/location) link.
+
+All you need to have is the private URL of the photo gallery.
+
+The script is written in Rust. Yes it's overkill! But it was a fun challenge.
 
 # Building
 
