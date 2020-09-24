@@ -14,12 +14,10 @@ cargo build
 
 # Running
 
-```shell script
-cargo run -- --help
-```
+## Syntax
 
 ```text
-Cheerz downloader 0.1.0
+Cheerz downloader 1.0.0
 Farzad FARID <farzy@farzy.org>:Gilles RASIGADE
 Download all pictures from a Cheerz event
 
@@ -35,6 +33,18 @@ OPTIONS:
 
 ARGS:
     <url>    URL provided by Cheerz for the event
+```
+
+## Using the Docker image
+
+```shell script
+docker run -v /tmp/cheerz:/tmp/cheerz farzadfarid/cheerz-dl URL
+```
+
+## Locally
+
+```shell script
+cargo run -- URL
 ```
 
 # Debugging
