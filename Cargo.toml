@@ -1,8 +1,9 @@
 [package]
 name = "cheerz-dl"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Farzad FARID <farzy@farzy.org>", "Gilles RASIGADE"]
 edition = "2018"
+license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
