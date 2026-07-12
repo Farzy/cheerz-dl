@@ -1,4 +1,4 @@
-FROM rust:1.46 as builder
+FROM rust:1.97 as builder
 WORKDIR /usr/src/cheerz-dl
 COPY . .
 RUN cargo install --path .
